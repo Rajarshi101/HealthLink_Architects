@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Geolocation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .map-container {
+        margin: 1rem;
+        width: 50%;
+      }
+
+      #map {
+        /* Adjust width and other styles for your map as needed */
+        width: 60%;
+        height: 80vh;
+        /* margin: 2rem; */
+        border: 2px solid black;
+        border-radius: 2%;
+      }
+    </style>
+    <!-- Include the Google Maps JavaScript API with your API key -->
+    <!-- <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcMwEC4-gAjl9MT19G2Rq-FG124gu8Kss&libraries=places&callback=initMap"></script> -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcMwEC4-gAjl9MT19G2Rq-FG124gu8Kss&callback=initMap" async defer></script> -->
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcMwEC4-gAjl9MT19G2Rq-FG124gu8Kss&callback=initMap"></script> -->
+    <script defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbwtf_dATwlZNIgG6UqcVrPwsFheNK0os&libraries=places&loading=async&callback=initMap"></script>
+  </head>
+
+  <body>
+    <div class="map-container">
+      <div id="map"></div>
+      {% for items in devices %}
+        <span id="variable" value="{{items}}">{{items}}</span>
+      {% endfor %}
+    </div>
+    <form action="user_map/{{username}}" method="POST">
+      <!-- <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
+      <button type="submit">Submit</button> -->
+    </form>
+    <!-- Use data attributes to store latitude and longitude -->
+    <input
+      type="hidden"
+      id="user_latitude"
+      name="user_latitude"
+      data-value="{{user_latitude}}"
+      readonly
+    />
+    <input
+      type="hidden"
+      id="user_longitude"
+      name="user_longitude"
+      data-value="{{user_longitude}}"
+    />
+    <input
+      type="hidden"
+      id="ambulance_latitude"
+      name="ambulance_latitude"
+      data-value="{{ambulance_latitude}}"
+    />
+    <input
+      type="hidden"
+      id="ambulance_longitude"
+      name="ambulance_longitude"
+      data-value="{{ambulance_longitude}}"
+    />
+    <script>
+
+      // var markers = [];
+      var map;
+      var directionsService;
+      var directionsRenderer;
+
+      function initMap() {
+        // Retrieve latitude and longitude from data attributes
+        var user_latitude = parseFloat(
+          document.getElementById("user_latitude").getAttribute("data-value")
+        );
+        var user_longitude = parseFloat(
+          document.getElementById("user_longitude").getAttribute("data-value")
+        );
+        var ambulance_latitude = parseFloat(
+          document
+            .getElementById("ambulance_latitude")
+            .getAttribute("data-value")
+        );
+        var ambulance_longitude = parseFloat(
+          document
+            .getElementById("ambulance_longitude")
+            .getAttribute("data-value")
+        );
+
+        // map = new google.maps.Map(document.getElementById("map"), {
+        //   center: { lat: ambulance_latitude, lng: ambulance_longitude },
+        //   zoom: 11,
+        // });
+        async function initMap() {
+          // const { Map } = await google.maps.importLibrary("maps");
+
+          map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: ambulance_latitude, lng: ambulance_longitude },
+            zoom: 11,
+          });
+        }
+
+        directionsService = new google.maps.DirectionsService();
+        directionsRenderer = new google.maps.DirectionsRenderer();
+        directionsRenderer.setMap(map);
+
+        var startLatLng = new google.maps.LatLng(
+          ambulance_latitude,
+          ambulance_longitude
+        );
+        var endLatLng = new google.maps.LatLng(user_latitude, user_longitude);
+
+        var request = {
+          origin: startLatLng,
+          destination: endLatLng,
+          travelMode: google.maps.TravelMode.DRIVING,
+        };
+
+        directionsService.route(request, function (result, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+          }
+        });
+      }
+
+    //   function initMap(val) {
+    //   map = new google.maps.Map(document.getElementById('map'), {
+    //     center: { lat: 0, lng: 0 },
+    //     zoom: 2
+    //   });
+    //   var customMarkerIcon = {
+    //     url: 'https://www.dropbox.com/scl/fi/rgwuk78u85o9u7k0hwhds/ambulance_marker.png?rlkey=qb2omsoc02547dheon9vmkyih&dl=1', // Replace with the actual path to your image
+    //     scaledSize: new google.maps.Size(40, 40), // Adjust the size as needed
+    //   };
+
+    //   val.forEach(function (item) {
+    //     const lat = parseFloat(item[1]);
+    //     const lon = parseFloat(item[2]);
+
+    //     const marker = new google.maps.Marker({
+    //       position: { lat:lat, lng:lon },
+    //       map:map,
+    //       icon:customMarkerIcon,
+    //       title: 'Device: ' + item[0] + '\nLocation: ' + item[1] + ', ' + item[2]
+    //     });
+
+    //     markers.push(marker);
+    //   });
+
+    //   // Center the map based on the average location of devices
+    //   centerMap();
+    // }
+
+    // function centerMap() {
+    //   if (markers.length === 0) {
+    //     return;
+    //   }
+
+    //   const bounds = new google.maps.LatLngBounds();
+    //   markers.forEach(function (marker) {
+    //     bounds.extend(marker.getPosition());
+    //   });
+
+    //   map.fitBounds(bounds);
+    // }
+      setInterval(function () {
+        location.reload();
+      }, 39000);
+    </script>
+  </body>
+</html>

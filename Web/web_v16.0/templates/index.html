@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Index Page</title>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbwtf_dATwlZNIgG6UqcVrPwsFheNK0os&loading=async&libraries=places&callback=initMap"
+        async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            /* justify-content: space-between; Add this property */
+            background-color: #f0f0f0;
+            /* Fallback background color */
+            background-image: url('https://www.dropbox.com/scl/fi/fl0j47hdi2i9vuz1mgzha/medical-emergency.jpeg?rlkey=x2f1giwj9lreaz3dv476w84uw&dl=1');
+            /* Background image URL */
+            background-size: 70%;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* Add an overlay with transparency */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            /* Adjust the opacity (0.8 = 80% transparent) */
+            z-index: -1;
+        }
+
+        #intro {
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        #intro h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            animation: highlight 3s ease-in-out infinite;
+        }
+
+        @keyframes highlight {
+
+            0%,
+            100% {
+                background-color: transparent;
+                color: black;
+            }
+
+            50% {
+                background-color: #007BFF;
+                color: white;
+            }
+        }
+
+        #intro p {
+            font-size: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* #get-started-button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        } */
+
+        /* Style buttons for registration options */
+        /* .registration-button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin: 10px;
+            cursor: pointer;
+            text-decoration: none;
+        } */
+
+        /* Change button color on hover */
+        /* #get-started-button:hover {
+            background-color: #0056b3;
+        } */
+
+        .analytics {
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        #Red-Alert {
+            padding: 2rem;
+            width: 30rem;
+        }
+
+        #map {
+            height: 17rem;
+        }
+
+        #Accident-Analytics {
+            padding: 2rem;
+            width: 30rem;
+        }
+
+        canvas {
+            max-width: 30rem;
+            margin: 0 auto;
+            display: block;
+            max-height: 17rem;
+        }
+
+        .holder { 
+                /* position: absolute;
+                top: 350px;
+                right: 90px; */
+                background-color:#9fc9b2;
+                width:300px;
+                height:370px;
+                overflow:hidden;
+                padding:1rem;
+                font-family:Helvetica;
+                font-size: 1rem;
+                text-emphasis-color: black;
+            }
+
+            .holder .mask {
+                /* position: relative;
+                left: 0px;
+                top: 10px; */
+                width:300px;
+                height:290px;
+                overflow: hidden;
+            }
+
+            .holder h2 {
+                font-size: 1.2rem;
+                color: black;
+            }
+
+            .holder ul {
+                list-style:none;
+                margin:0;
+                padding:0;
+                position: relative;
+            }
+
+            .holder ul li {
+                padding:0.5rem 0;
+                color: black;
+            }
+
+            .holder ul li a {
+                color:darkred;
+                text-decoration:none;
+            }
+
+        /* .notice-board {
+            height: 300px;
+            overflow-y: auto;
+        } */
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.5);
+            transition: opacity 200ms;
+            visibility: hidden;
+            opacity: 0;
+
+            &.light {
+                background: rgba(255, 255, 255, 0.5);
+            }
+
+            .cancel {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                cursor: default;
+            }
+
+            &:target {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+
+        .popup {
+            margin: 1rem auto;
+            background-color: #f4f6f7;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            /* Increased the width */
+            text-align: center;
+            padding: 30px;
+            transition: transform 0.3s, border-color 0.3s;
+            /* Add hover effect for transform and border-color */
+            border: 2px solid #333;
+            /* Add a border */
+            display: grid;
+        }
+
+        .popup:hover {
+            transform: scale(1.05);
+            border-color: #555;
+            /* Border color on hover */
+        }
+
+        .popup h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .popup .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .popup .form-group .forget-pass {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .popup label {
+            display: block;
+            font-weight: bold;
+            margin: 5px;
+            color: #555;
+        }
+
+        .popup input[type="text"],
+        input[type="password"] {
+            width: 95%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .popup button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .popup button:hover {
+            background-color: #555;
+        }
+
+        .popup .close {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 20px;
+            right: 20px;
+            opacity: 0.5;
+            transition: all 200ms;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: rgb(26 66 109);
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .popup .error-message {
+            color: #ff0000;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* .popup {
+            margin: 75px auto;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #666;
+            width: 300px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
+        .light & {
+            border-color: #aaa;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #666;
+            font-family: "Trebuchet MS", Tahoma, Arial, sans-serif;
+        }
+        .close {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 20px;
+            right: 20px;
+            opacity: 0.8;
+            transition: all 200ms;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #666;
+            &:hover {
+            opacity: 1;
+            }
+        }
+        .content {
+            max-height: 400px;
+            overflow: auto;
+        }
+        p {
+            margin: 0 0 1em;
+            &:last-child {
+            margin: 0;
+            }
+        }
+        } */
+
+        header {
+            text-align: center;
+            padding: 2rem 2rem;
+            background-color: #192024;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            color: white;
+
+        }
+
+        header .register {
+            text-decoration: none;
+            margin: 0 1rem;
+            color: white;
+            position: fixed;
+            right: 0;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Dropdown button */
+        .dropbtn {
+            background-color: #007BFF;
+            ;
+            color: white;
+            padding: 10px 20px;
+            font-size: 20px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Dropdown content (hidden by default) */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 100px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        /* Links inside the dropdown */
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* Change color of links on hover */
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Change the background color of the dropdown button when the dropdown content is shown */
+        .dropdown:hover .dropbtn {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: #192024;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-bottom: 0;
+            color: white;
+        }
+
+        footer a {
+            text-decoration: none;
+            margin: 0 10px;
+            color: yellow;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        LOGO HERE
+        <div class="register">
+            <div class="dropdown">
+                <button class="dropbtn">Signup</button>
+                <div class="dropdown-content">
+                    <a class="registration-button" href="#popup1">Patient</a>
+                    <a class="registration-button" href="#popup2">Ambulance</a>
+                    <a class="registration-button" href="#popup3">Hospital</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">Login</button>
+                <div class="dropdown-content">
+                    <a class="registration-button" href="#popup4">Patient</a>
+                    <a class="registration-button" href="#popup5">Ambulance</a>
+                    <a class="registration-button" href="#popup6">Hospital</a>
+                </div>
+            </div>
+            <!-- <button class="registration-button" onclick="redirectTo('signup')">Sign Up </button>
+            <button class="registration-button" onclick="redirectTo('loginpage')">Login </button> -->
+            <!-- <a class="registration-button" href="#popup1">Sign Up </a>
+                <a class="registration-button" href="#popup2">Login </a> -->
+        </div>
+    </header>
+    <div id="intro">
+        <h1>LifeSaver Connect</h1>
+        <p>Saving Lives...</p>
+    </div>
+    <div class="analytics">
+        <div id="Red-Alert">
+            <h1>Red Alert Zones</h1>
+            <div id="map"></div>
+        </div>
+        <div id="Accident-Analytics">
+            <h1>Accidents Analysis</h1>
+            <canvas id="accidentsChart"></canvas>
+        </div>
+        <!-- <div class="notice-board">
+            {% for doc in data %}
+                <p>{{ doc.user }} {{ doc.rating }} {{ doc.feedback_text }}</p>
+            {% endfor %}
+        </div> -->
+        <div class="holder">
+            <h2><b><u>Our App Feedback</u></b></h2>
+            <ul id="ticker01">
+                {% for feedback in feedback_data %}
+                <li><span><i><b>User:</b></i> {{ feedback['user'] }}</span><br><span><i><b>Rating:</b></i> {{ feedback['rating'] }} Star</span> <span><i><b>Feedback:</b></i> {{ feedback['feedback_text'] }}</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <h2>Patient Signup</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/user_reg">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+
+                    <label for="address">Location:</label>
+                    <input type="text" id="address" name="address" required>
+
+                    <label for="userAge">Age:</label>
+                    <input type="number" id="userAge" name="userAge" required>
+
+                    <label for="phone">Phone No.:</label>
+                    <input type="text" id="phone" name="phone" required>
+
+                    <label for="userEmail">Email:</label>
+                    <input type="text" id="userEmail" name="userEmail" required>
+
+                    <label for="username">User Name:</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup2" class="overlay">
+        <div class="popup">
+            <h2>Ambulance Signup</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/ambulance_reg">
+                <div class="form-group">
+                    <label for="driverName">Name of the Driver:</label>
+                    <input type="text" id="driverName" name="driverName" required>
+
+                    <label for="carNumber">Car Number:</label>
+                    <input type="text" id="carNumber" name="carNumber" required>
+
+                    <label for="driverAge">Age:</label>
+                    <input type="number" id="driverAge" name="driverAge" required>
+
+                    <label for="phone">Phone No.:</label>
+                    <input type="text" id="phone" name="phone" required>
+
+                    <label for="userEmail">Email:</label>
+                    <input type="text" id="userEmail" name="userEmail" required>
+
+                    <label for="panNumber">PAN Number:</label>
+                    <input type="text" id="panNumber" name="panNumber" required>
+
+                    <label for="license">Driving License:</label>
+                    <input type="text" id="license" name="license" required>
+
+                    <label for="username">User Name:</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <!-- <label for="Latitude">Latitude:</label> -->
+                    <input type="hidden" id="Latitude" name="Latitude" readonly>
+
+                    <!-- <label for="password">longiyyu:</label> -->
+                    <input type="hidden" id="longitude" name="longitude" readonly>
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup3" class="overlay">
+        <div class="popup">
+            <h2>Hospital Signup</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/hospital_reg">
+                <div class="form-group">
+                    <label for="inchargeName">Name of the Incharge:</label>
+                    <input type="text" id="inchargeName" name="inchargeName" required>
+
+                    <label for="hospitalLocation">Location:</label>
+                    <input type="text" id="hospitalLocation" name="hospitalLocation" required>
+
+                    <label for="hospitalName">Name of the Hospital:</label>
+                    <input type="text" id="hospitalName" name="hospitalName" required>
+
+                    <label for="userEmail">Email:</label>
+                    <input type="text" id="userEmail" name="userEmail" required>
+
+                    <label for="username">User Name:</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup4" class="overlay">
+        <div class="popup">
+            <h2>Patient Login</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/user_login">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <div class="forget-pass">
+                        <a class="forget-password" href="#popup7">Forget Password</a>
+                    </div>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup5" class="overlay">
+        <div class="popup">
+            <h2>Ambulance Login</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/ambulance_login">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <div class="forget-pass">
+                        <a class="forget-password" href="#popup8">Forget Password</a>
+                    </div>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup6" class="overlay">
+        <div class="popup">
+            <h2>Hospital Login</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/hospital_login">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+
+                    <div class="forget-pass">
+                        <a class="forget-password" href="#popup9">Forget Password</a>
+                    </div>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup7" class="overlay">
+        <div class="popup">
+            <h2>Patient Forget Password</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/reset_password">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" required>
+                    <input type="hidden" id="ref_id" name="ref_id" value="u">
+                </div>
+
+                <button type="submit">Reset Password</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup8" class="overlay">
+        <div class="popup">
+            <h2>Ambulance Forget Password</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/reset_password">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" required>
+                    <input type="hidden" id="ref_id" name="ref_id" value="a">
+                </div>
+
+                <button type="submit">Reset Password</button>
+            </form>
+        </div>
+    </div>
+    <div id="popup9" class="overlay">
+        <div class="popup">
+            <h2>Hospital Forget Password</h2>
+            <a class="close" href="#">&times;</a>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flash-messages">
+                {% for message in messages %}
+                <li class="flash-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+            <form method="POST" action="/reset_password">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" required>
+                    <input type="hidden" id="ref_id" name="ref_id" value="h">
+                </div>
+
+                <button type="submit">Reset Password</button>
+            </form>
+        </div>
+    </div>
+    <footer>
+        &copy; Copyright @ LifeSaver Architech
+        <a href="{{ url_for('contactus')}}">Contact Us</a>
+        <a href="{{ url_for('aboutus')}}">About Us</a>
+    </footer>
+
+    <script>
+
+        // window.onload = function() {
+        //     var noticeBoard = document.querySelector('.notice-board');
+        //     noticeBoard.scrollTop = noticeBoard.scrollHeight;
+        // }
+
+        jQuery.fn.liScroll = function(settings) {
+                settings = jQuery.extend({
+                    travelocity: 0.03
+                }, settings);		
+                return this.each(function(){
+                    var $strip = jQuery(this);
+                    $strip.addClass("newsticker")
+                    var stripHeight = 1;
+                    $strip.find("li").each(function(i){
+                        stripHeight += jQuery(this, i).outerHeight(true); // thanks to Michael Haszprunar and Fabien Volpi
+                    });
+                    var $mask = $strip.wrap("<div class='mask'></div>");
+                    var $tickercontainer = $strip.parent().wrap("<div class='tickercontainer'></div>");								
+                    var containerHeight = $strip.parent().parent().height();	//a.k.a. 'mask' width 	
+                    $strip.height(stripHeight);			
+                    var totalTravel = stripHeight;
+                    var defTiming = totalTravel/settings.travelocity;	// thanks to Scott Waye		
+                    function scrollnews(spazio, tempo){
+                        $strip.animate({top: '-='+ spazio}, tempo, "linear", function(){$strip.css("top", containerHeight); scrollnews(totalTravel, defTiming);});
+                    }
+                    scrollnews(totalTravel, defTiming);				
+                        $strip.hover(function(){
+                        jQuery(this).stop();
+                    },
+                    function(){
+                        var offset = jQuery(this).offset();
+                        var residualSpace = offset.top + stripHeight;
+                        var residualTime = residualSpace/settings.travelocity;
+                        scrollnews(residualSpace, residualTime);
+                    });			
+                });	
+            };
+            $(function(){
+                $("ul#ticker01").liScroll();
+            });
+
+        // Red Alert Map
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                // For India
+                // center: { lat: 23.5120, lng: 80.3290 },
+                // zoom: 4
+
+                // For Kolkata
+                center: { lat: 22.5626, lng: 88.3630 },
+                zoom: 10
+            });
+
+            fetch('/get_red_alert_zones')
+                .then(response => response.json())
+                .then(redAlertZones => {
+                    // Iterate over red alert zones
+                    redAlertZones.forEach(zone => {
+                        // Define the polygon coordinates (adjust as needed)
+                        var polygonCoords = [
+                            { lat: zone.latitude + 0.01, lng: zone.longitude - 0.01 },
+                            { lat: zone.latitude - 0.01, lng: zone.longitude - 0.01 },
+                            { lat: zone.latitude - 0.01, lng: zone.longitude + 0.01 },
+                            { lat: zone.latitude + 0.01, lng: zone.longitude + 0.01 }
+                        ];
+
+                        // Create a polygon to cover the area around the pincode
+                        var polygon = new google.maps.Polygon({
+                            paths: [polygonCoords],
+                            strokeColor: '#FF0000', // Red border color
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000', // Red fill color
+                            fillOpacity: 0.2
+                        });
+
+                        // Set the polygon on the map
+                        polygon.setMap(map);
+                    });
+                })
+                .catch(error => console.error('Error fetching red alert zones:', error));
+        }
+
+        // Accident Analytics
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/get_accidents_data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Process data to extract state names for x-axis labels
+                    const processedData = processData(data);
+                    renderChart(processedData);
+                })
+                .catch(error => {
+                    console.error('Error fetching accidents data:', error);
+                    // Handle the error, e.g., display a message to the user
+                });
+        });
+
+        function processData(data) {
+            // Extract state names for x-axis labels
+            const processedData = {
+                labels: Object.keys(data).map(entry => entry),
+                datasets: [{
+                    label: 'Accidents Count',
+                    data: Object.values(data),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            };
+            return processedData;
+        }
+
+        function renderChart(data) {
+            try {
+                const ctx = document.getElementById('accidentsChart').getContext('2d');
+
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'State'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Accidents Count'
+                            },
+                            reverse: true  // Set this property to true
+                        }]
+                    }
+                };
+
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: chartOptions
+                });
+            } catch (chartError) {
+                console.error('Error rendering chart:', chartError);
+                // Handle the chart rendering error, e.g., display a message to the user
+            }
+        }
+    </script>
+
+</body>
+
+</html>

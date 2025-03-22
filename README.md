@@ -26,7 +26,7 @@ For support, email healthlinkarchitects@gmail.com or join our Slack channel http
 Clone the project
 
 ```bash
-  git clone https://github.com/ArnabSen1/HealthlinkArchitects.git
+  git clone https://github.com/Rajarshi101/HealthLink_Architects.git
 ```
 
 Go to the project directory

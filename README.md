@@ -1,5 +1,5 @@
 
-# HealthLink Architects
+# LifeSevak
 
 Created a user-friendly application on Flutter and Dart, featuring an SOS button for
 emergency bookings, integrated real-time communication, and bed availability checks, now
